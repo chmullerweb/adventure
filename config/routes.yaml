@@ -1,0 +1,32 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+
+# the "app_lucky_number" route name is not important yet
+app_post_adventure:
+    path: /adventure/start
+    controller: App\Controller\AdventureController::postAdventureAction
+
+app_get_adventure:
+    path: /adventure/{adventure}
+    controller: App\Controller\AdventureController::getAdventureAction
+
+app_get_tile:
+    path: /adventure/{adventure}/tile
+    controller: App\Controller\AdventureController::getTileAction
+
+app_post_character_move:
+    path: /character/{character}/action/move
+    controller: App\Controller\CharacterController::postMoveAction
+
+app_post_character_attack:
+    path: /character/{character}/action/attack
+    controller: App\Controller\CharacterController::postAttackAction
+
+app_post_character_rest:
+    path: /character/{character}/action/rest
+    controller: App\Controller\CharacterController::postRestAction
+
+app_get_character:
+    path: /character/{character}
+    controller: App\Controller\CharacterController::getCharacterAction
