@@ -29,6 +29,11 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    # try to setup manager service: e.g. CharacterManager.php
     # App\Manager\:
     #     arguments:
     #         -'@doctrine.orm.entity_manager'
+    #     calls:
+    #         - method: setRepository
+    #         arguments:
+    #             -'%App\Repository\Character%'      

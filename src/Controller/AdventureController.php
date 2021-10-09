@@ -50,9 +50,12 @@ class AdventureController extends AbstractController
         
         $em->flush();
 
+        dump($adventure);
+        dump($character);die;
+
         return $this->json([
-            $adventure,
-            $character
+            'adventure' => $adventure,
+            'character' => $character
         ]);
     }
 
