@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TileRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -33,6 +35,16 @@ class Tile
      * @ORM\JoinColumn(nullable=false)
      */
     private $effects;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Adventure::class, mappedBy="tile")
+     */
+    private $adventure_relation;
+
+    public function __construct()
+    {
+        $this->adventure_relation = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -71,6 +83,48 @@ class Tile
     public function setEffects(?TileEffects $effects): self
     {
         $this->effects = $effects;
+
+        return $this;
+    }
+
+    public function getAdventure(): ?Adventure
+    {
+        return $this->adventure;
+    }
+
+    public function setAdventure(?Adventure $adventure): self
+    {
+        $this->adventure = $adventure;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Adventure[]
+     */
+    public function getAdventureRelation(): Collection
+    {
+        return $this->adventure_relation;
+    }
+
+    public function addAdventureRelation(Adventure $adventureRelation): self
+    {
+        if (!$this->adventure_relation->contains($adventureRelation)) {
+            $this->adventure_relation[] = $adventureRelation;
+            $adventureRelation->setTile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdventureRelation(Adventure $adventureRelation): self
+    {
+        if ($this->adventure_relation->removeElement($adventureRelation)) {
+            // set the owning side to null (unless already changed)
+            if ($adventureRelation->getTile() === $this) {
+                $adventureRelation->setTile(null);
+            }
+        }
 
         return $this;
     }

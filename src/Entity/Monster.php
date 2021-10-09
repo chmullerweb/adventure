@@ -20,7 +20,7 @@ class Monster
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=MonsterType::class, mappedBy="monster_relation")
+     * @ORM\ManyToOne(targetEntity=MonsterType::class)
      */
     private $type;
 
@@ -39,12 +39,12 @@ class Monster
         return $this->id;
     }
 
-    public function getType(): ?string
+    public function getType(): ?MonsterType
     {
         return $this->type;
     }
 
-    public function setType(string $type): self
+    public function setType(?MonsterType $type): self
     {
         $this->type = $type;
 

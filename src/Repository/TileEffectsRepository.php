@@ -19,7 +19,7 @@ class TileEffectsRepository extends ServiceEntityRepository
         parent::__construct($registry, TileEffects::class);
     }
     
-    public function findTypeTileEffects(string $type) {
+    public function findEffectsByTypeTile(string $type) {
         return $this->createQueryBuilder('t')
             ->andWhere('t.type = :type')
                ->setParameter('type', $type)

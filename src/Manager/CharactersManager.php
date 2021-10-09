@@ -5,7 +5,7 @@ use App\Entity\Character;
 use Doctrine\ORM\EntityManagerInterface;
 
 
-class CharacterManager
+class CharactersManager
 {
     protected $em;
 

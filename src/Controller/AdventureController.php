@@ -5,7 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Entity\{Character, Adventure, Tile, TileEffects, Monster};
+use App\Entity\{Character, Adventure, Tile, TileEffects, Monster, MonsterType};
 
 
 class AdventureController extends AbstractController
@@ -13,83 +13,47 @@ class AdventureController extends AbstractController
     public function postAdventureAction()
     {
         $em = $this->getDoctrine()->getManager();
-        //new Tile
+
+        // create monster
+        $monster = new Monster();
+        $monsterType = ['ork', 'gobelin', 'ghost', 'troll'];
+        $monsterType = $monsterType[array_rand($monsterType, 1)];
+        $monsterType = $this->getDoctrine()->getRepository(MonsterType::class)->findMonsterByType($monsterType);
+        $monster->setType($monsterType);
+        $em->persist($monster);
+        $em->flush();
+
+        // create tile
         $tile = new Tile();
-        $type = ['grasslands', 'hills', 'forest', 'mountains', 'desert'];
-        $tile->setType($type[array_rand($type, 1)]);
-
+        $tileType = ['grasslands', 'hills', 'forest', 'mountains', 'desert'];
+        $tile->setType($tileType[array_rand($tileType, 1)]);
         // set effects
-        $effects = $this->getDoctrine()->getRepository(TileEffects::class)->findTypeTileEffects($tile->getType());
+        $effects = $this->getDoctrine()->getRepository(TileEffects::class)->findEffectsByTypeTile($tile->getType());
         $tile->setEffects($effects);
-
-        $monster = $this->getDoctrine()->getRepository(Monster::class)->findTypeTileEffects($tile->getType());
-        $tile->setMonster('ork');
-        
+        // set monster
+        $tile->setMonster($monster);
         $em->persist($tile);
         $em->flush();
-        dump($tile);die;
-        // assign special effect
-        // créer une entity à join avec tile > et aller dans phpmyadmin pour ajouter des instances
-        // $datas = [];
-        // switch ($tile->getType()) {
-        //     case 'grasslands':
-        //         $datas = {
-        //             "point": 2,
-        //             "effect": "attack",
-        //             "character": "ork"
-        //         }
-        //         break;
-        //     case 'hills':
-        //         $datas = {
-        //             'point': 2,
-        //             'effect': 'attack',
-        //             'character': 'ghost'
-        //         }
-        //         break;
-        //     case 'forest':
-        //         $datas = {
-        //             'point': 2,
-        //             'effect': 'attack',
-        //             'character': 'gobelin'
-        //         }
-        //         break;
-        //     case 'mountains':
-        //         $datas = {
-        //             'point': 2,
-        //             'effect': 'attack',
-        //             'character': 'troll'
-        //         }
-        //         break;    
-        //     case 'desert':
-        //         $datas = {
-        //             'point': -1,
-        //             'effect': 'attack',
-        //             'character': 'character'
-        //         }
-        //         break;
-        //     default:
-        //         $datas;      
-        // }
         
-        //new Adventure
-        $adventure = new Adventure();
-        $adventure->setScore(0);
-        $adventure->setTile($tile->getId());
-        
-
-        //new Character set with default value
+        //create Character & set with default value
         $character = new Character();
         $character->setLife(20);
         $character->setAttack(12);
-        $character->setSchielding(5);
+        $character->setShielding(5);
+        $em->persist($character);
+
+        //create Adventure
+        $adventure = new Adventure();
+        $adventure->setScore(0);
+        $adventure->setTile($tile);
+        $em->persist($adventure);
         
+        $em->flush();
 
-
-        $id = random_int(0, 100);
-
-        return new Response(
-            [$tile, $character, $adventure]
-        );
+        return $this->json([
+            $adventure,
+            $character
+        ]);
     }
 
     public function getAdventureAction(Request $request, $adventure): Response

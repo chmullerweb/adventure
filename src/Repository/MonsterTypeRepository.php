@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Repository;
 
 use App\Entity\MonsterType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -12,11 +12,20 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method MonsterType[]    findAll()
  * @method MonsterType[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class MonsterRepository extends ServiceEntityRepository
+class MonsterTypeRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MonsterType::class);
+    }
+
+    public function findMonsterByType(string $type) {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.type = :type')
+               ->setParameter('type', $type)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     // /**
