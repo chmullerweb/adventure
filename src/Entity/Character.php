@@ -33,6 +33,11 @@ class Character
      */
     private $shielding;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Adventure::class, mappedBy="character")
+     */
+    private $adventure_relation;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -70,6 +75,28 @@ class Character
     public function setShielding(int $shielding): self
     {
         $this->shielding = $shielding;
+
+        return $this;
+    }
+
+    public function getAdventureRelation(): ?Adventure
+    {
+        return $this->adventure_relation;
+    }
+
+    public function setAdventureRelation(?Adventure $adventure_relation): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($adventure_relation === null && $this->adventure_relation !== null) {
+            $this->adventure_relation->setCharacter(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($adventure_relation !== null && $adventure_relation->getCharacter() !== $this) {
+            $adventure_relation->setCharacter($this);
+        }
+
+        $this->adventure_relation = $adventure_relation;
 
         return $this;
     }

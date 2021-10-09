@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Adventure;
+use App\Entity\{Character, Adventure, Tile, TileEffects, Monster, MonsterType};
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,6 +17,17 @@ class AdventureRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Adventure::class);
+    }
+
+    public function getAdventureItems(Tile $tile)
+    {
+        $q = $this->createQueryBuilder('a')
+        ->select('a')
+        ->where('a.tile_id = :tile_id')
+            ->setParameter('tile_id', $tile->getId())
+        ;
+        return $q->getQuery()->getResult();
+
     }
 
     // /**

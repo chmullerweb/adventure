@@ -6,6 +6,7 @@ use App\Repository\AdventureRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=AdventureRepository::class)
@@ -16,18 +17,27 @@ class Adventure
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"show_adventure"})
      */
     private $id;
 
     /**
       * @ORM\ManyToOne(targetEntity=Tile::class)
+     * @Groups({"show_adventure"})
      */
     private $tile;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"show_adventure"})
      */
     private $score;
+
+    /**
+      * @ORM\OneToOne(targetEntity=Character::class)
+     * @Groups({"show_adventure"})
+     */
+    private $character;
 
     public function __construct()
     {
@@ -81,6 +91,18 @@ class Adventure
                 $tile->setAdventure(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCharacter(): ?Character
+    {
+        return $this->character;
+    }
+
+    public function setCharacter(?Character $character): self
+    {
+        $this->character = $character;
 
         return $this;
     }

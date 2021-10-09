@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\{Character, Adventure, Tile, TileEffects, Monster, MonsterType};
+use Symfony\Component\Serializer\SerializerInterface;
 
 
 class AdventureController extends AbstractController
@@ -41,30 +42,39 @@ class AdventureController extends AbstractController
         $character->setAttack(12);
         $character->setShielding(5);
         $em->persist($character);
+        $em->flush();
 
         //create Adventure
         $adventure = new Adventure();
         $adventure->setScore(0);
         $adventure->setTile($tile);
+        $adventure->setCharacter($character);
         $em->persist($adventure);
-        
         $em->flush();
 
         dump($adventure);
         dump($character);die;
+        
+        // try to setup JsonSerializableNormalizer
+        // $json = $serializer->serialize(
+        //     $adventure,
+        //     'json',
+        //     ['adventure' => 'show_adventure']
+        // );
 
-        return $this->json([
-            'adventure' => $adventure,
-            'character' => $character
-        ]);
     }
 
-    public function getAdventureAction(Request $request, $adventure): Response
+    public function getAdventureAction(Request $request, Adventure $adventure): Response
     {
-        // $request->query->get('page');
-        return $this->json([
-            'adventure' => $adventure
-        ]);
+        $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findById($adventure);
+        // try to find solution to "null" parameters for joined Entity ($tile, $tile_effects, $monster, $character)
+        // $tile = $adventure[0]->getTile()
+        // $adventure = $this->getDoctrine()->getRepository(Adventure::class)->getAdventureItems($tile);
+
+        $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
+        $character = $this->getDoctrine()->getRepository(Character::class)->findById($adventure[0]->getCharacter()->getId());
+
+        dump($adventure);die;
     }
 
     public function getTileAction($adventure): Response
