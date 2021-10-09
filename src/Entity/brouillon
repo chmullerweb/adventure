@@ -1,0 +1,83 @@
+<?php
+
+/**
+     * @ORM\ManyToOne(targetEntity="TileEffect")
+     * @ORM\JoinColumn
+     */
+    private $effect;
+    
+namespace App\Entity;
+
+use App\Repository\TileEffectRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity(repositoryClass=TileEffectRepository::class)
+ */
+class TileEffect
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Tile", mappedBy="effect")
+     * @ORM\JoinColumn()
+     */
+    private $type;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $effect_value;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $effect_target;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function __construct()
+    {
+        $this->type = new ArrayCollection();
+    }
+
+
+    public function getType(): Collection
+    {
+        return $this->type;
+    }
+
+    public function getEffectValue(): ?int
+    {
+        return $this->effect_value;
+    }
+
+    public function setEffectValue(int $effect_value): self
+    {
+        $this->effect_value = $effect_value;
+
+        return $this;
+    }
+
+    public function getEffectTarget(): ?string
+    {
+        return $this->effect_target;
+    }
+
+    public function setEffectTarget(string $effect_target): self
+    {
+        $this->effect_target = $effect_target;
+
+        return $this;
+    }
+}
