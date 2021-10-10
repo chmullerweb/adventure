@@ -39,16 +39,6 @@ class MonsterType
      */
     private $shielding;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Monster::class, mappedBy="type")
-     */
-    private $monster_relation;
-
-    public function __construct()
-    {
-        $this->monster_relation = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -98,36 +88,6 @@ class MonsterType
     public function setShielding(int $shielding): self
     {
         $this->shielding = $shielding;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Tile[]
-     */
-    public function getMonsterRelation(): Collection
-    {
-        return $this->monster_relation;
-    }
-
-    public function addMonsterRelation(Monster $monsterRelation): self
-    {
-        if (!$this->monster_relation->contains($monsterRelation)) {
-            $this->monster_relation[] = $monsterRelation;
-            $monsterRelation->setMonster($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMonsterRelation(Monster $monsterRelation): self
-    {
-        if ($this->monster_relation->removeElement($monsterRelation)) {
-            // set the owning side to null (unless already changed)
-            if ($monsterRelation->getMonster() === $this) {
-                $monsterRelation->setMonster(null);
-            }
-        }
 
         return $this;
     }

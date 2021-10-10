@@ -20,7 +20,7 @@ class Monster
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=MonsterType::class)
+     * @ORM\Column(type="string")
      */
     private $type;
 
@@ -28,6 +28,21 @@ class Monster
      * @ORM\OneToMany(targetEntity=Tile::class, mappedBy="monster")
      */
     private $tile_relation;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $life;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $attack;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $shielding;
 
     public function __construct()
     {
@@ -39,12 +54,12 @@ class Monster
         return $this->id;
     }
 
-    public function getType(): ?MonsterType
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setType(?MonsterType $type): self
+    public function setType(string $type): self
     {
         $this->type = $type;
 
@@ -77,6 +92,42 @@ class Monster
                 $tileRelation->setMonster(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLife(): ?int
+    {
+        return $this->life;
+    }
+
+    public function setLife(int $life): self
+    {
+        $this->life = $life;
+
+        return $this;
+    }
+
+    public function getAttack(): ?int
+    {
+        return $this->attack;
+    }
+
+    public function setAttack(int $attack): self
+    {
+        $this->attack = $attack;
+
+        return $this;
+    }
+
+    public function getShielding(): ?int
+    {
+        return $this->shielding;
+    }
+
+    public function setShielding(int $shielding): self
+    {
+        $this->shielding = $shielding;
 
         return $this;
     }

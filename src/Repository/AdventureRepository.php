@@ -30,6 +30,16 @@ class AdventureRepository extends ServiceEntityRepository
 
     }
 
+    public function findAdventureByCharacter(Character $character)
+    {
+        $q = $this->createQueryBuilder('a')
+        ->select('a')
+        ->where('a.character = :character')
+            ->setParameter('character', $character->getId())
+        ;
+        return $q->getQuery()->getResult();
+    }
+
     // /**
     //  * @return Adventure[] Returns an array of Adventure objects
     //  */

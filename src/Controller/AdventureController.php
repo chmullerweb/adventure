@@ -20,13 +20,16 @@ class AdventureController extends AbstractController
         $monsterType = ['ork', 'gobelin', 'ghost', 'troll'];
         $monsterType = $monsterType[array_rand($monsterType, 1)];
         $monsterType = $this->getDoctrine()->getRepository(MonsterType::class)->findMonsterByType($monsterType);
-        $monster->setType($monsterType);
+        $monster->setType($monsterType->getType());
+        $monster->setLife($monsterType->getLife());
+        $monster->setAttack($monsterType->getAttack());
+        $monster->setShielding($monsterType->getShielding());
         $em->persist($monster);
         $em->flush();
 
         // create tile
         $tile = new Tile();
-        $tileType = ['grasslands', 'hills', 'forest', 'mountains', 'desert'];
+        $tileType = ['grasslands', 'hills', 'forest', 'mountains', 'desert', 'swamp'];
         $tile->setType($tileType[array_rand($tileType, 1)]);
         // set effects
         $effects = $this->getDoctrine()->getRepository(TileEffects::class)->findEffectsByTypeTile($tile->getType());
@@ -77,11 +80,14 @@ class AdventureController extends AbstractController
         dump($adventure);die;
     }
 
-    public function getTileAction($adventure): Response
+    public function getTileAction(Request $request, Adventure $adventure): Response
     {
-        return $this->json([
-            'tile attributs' => $adventure
-        ]);
+        $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findById($adventure);
+        $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
+        $monster = $this->getDoctrine()->getRepository(Monster::class)->findById($tile[0]->getMonster()->getId());
+
+        dump($monster, $tile);die;
+
     }
 
 }
