@@ -8,8 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Entity\{Character, Adventure, Tile, TileEffects, Monster, MonsterType};
 use Symfony\Component\Serializer\SerializerInterface;
 
-
-
 class AdventureController extends AbstractController
 {
     public function postAdventureAction()
