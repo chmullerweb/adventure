@@ -16,6 +16,6 @@ J'ai alors opté pour des dump pour visualiser la réponse dans postman/insomnia
 
 5. À cause du point 4, je n'arrive pas à accéder au getter et au setter après une requête sql. Exemple : si j'ajoute une tile à une aventure, j' ai cette erreur : “Attempted to call an undefined method named "contains" of class "Proxies\__CG__\App\Entity\Tile".”
 
-7. En comptant le setup de mon environnent de dev (chose à laquelle je ne suis pas rôdée), la compréhension du test et l’écriture du code, j’ai passé tout de même 12h. Et malgré cela, je n'ai pas eu le temps de faire de doc technique, ni le random du chiffre obtenu au lancé de dés, ni certains call (character.rest, aventure.end).
+7. En comptant le setup de mon environnent de dev (chose à laquelle je ne suis pas rôdée), la compréhension du test et l’écriture du code, j’ai passé tout de même 12h. Très loin des 2h-4h annoncées. 🤯 Et malgré cela, je n'ai pas eu le temps de faire de doc technique, ni le random du chiffre obtenu au lancé de dés, ni certains call (character.rest, aventure.end).
 
 8. J’ai choisi le langage Symfony pour effectuer ce test car c’est le langage de programmation orientée objet que j’utilise depuis 1 an. 
