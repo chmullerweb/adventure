@@ -9,6 +9,7 @@ use App\Entity\{Character, Adventure, Tile, TileEffects, Monster, MonsterType};
 use Symfony\Component\Serializer\SerializerInterface;
 
 
+
 class AdventureController extends AbstractController
 {
     public function postAdventureAction()
@@ -59,8 +60,9 @@ class AdventureController extends AbstractController
         dump($character);die;
         
         /*** try to setup JsonSerializableNormalizer ***/
-        /* $json = $serializer->serialize($adventure,'json', ['adventure' => 'show_adventure']); */
-
+        /* $jsonResponse = $serializer->serialize($adventure,'json', ['adventure' => 'show_adventure']); 
+           echo $jsonResponse;
+        */
     }
 
     public function getAdventureAction(Request $request, Adventure $adventure): Response

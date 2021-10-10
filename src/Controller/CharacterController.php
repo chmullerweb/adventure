@@ -5,6 +5,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\{Character, Monster, Adventure, Tile, MonsterType, TileEffects};
+use Symfony\Component\Serializer\Serializer;
 
 class CharacterController extends AbstractController
     {
@@ -95,7 +96,7 @@ class CharacterController extends AbstractController
         $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
         $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
         $monster = $this->getDoctrine()->getRepository(Monster::class)->findById($tile[0]->getMonster()->getId());
-        dump($tile);die;
+
         $monsterRoaming = $monster[0]->getLife() !== 0;
 
         if (!$monsterRoaming) {
