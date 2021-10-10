@@ -7,6 +7,8 @@ use App\Entity\{Character, Monster, Adventure, Tile, MonsterType, TileEffects};
 
 class CharacterController extends AbstractController
     {
+
+    /*Character.move*/    
     public function postMoveAction(Character $character): Response
     {
         $em = $this->getDoctrine()->getManager();
@@ -19,7 +21,7 @@ class CharacterController extends AbstractController
 
         $monsterRoaming = $monster[0]->getLife() !== 0;
         
-        /* if monster still alive, monster attacks */
+        /* if monster still alive, monster attacks - Monster.attack*/
         if ($monsterRoaming) {
 
             /* set special effect */
@@ -54,7 +56,7 @@ class CharacterController extends AbstractController
         
         /* character moves, a new tile is created and added to this adventure */
 
-        /* create a monster to assigned to the new tile */
+        /* create a monster to assigned to the new tile - Tile.new */
         $monster = new Monster();
         $monsterType = ['ork', 'gobelin', 'ghost', 'troll'];
         $monsterType = $monsterType[array_rand($monsterType, 1)];
@@ -85,11 +87,77 @@ class CharacterController extends AbstractController
 
     }
 
-    public function postAttackAction($character): Response
+    public function postAttackAction(Character $character): Response
     {
-        return $this->json([
-            'damage points' => $character
-        ]);
+        /* test if monster is roaming on the active tile */
+        $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
+        $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
+        $monster = $this->getDoctrine()->getRepository(Monster::class)->findById($tile[0]->getMonster()->getId());
+        dump($monster);
+        
+        $monsterRoaming = $monster[0]->getLife() !== 0;
+
+        if (!$monsterRoaming) {
+           dump('action refused');die;
+        } else {
+           $character = $this->getDoctrine()->getRepository(Character::class)->findOneById($character);
+
+           /* character attacks */
+            // $characterAttack    = $character->getAttack();
+            $characterAttack    = 6;
+            $monsterShielding   = $monster[0]->getShielding();
+            $monsterLife        = $monster[0]->getLife();
+
+           /* launch dice method missing */
+           if ($characterAttack > $monsterShielding) {
+              $remainingLife = $monsterLife - ($characterAttack - $monsterShielding);
+              $monster[0]->setLife($remainingLife);
+              dump($monster);die;
+           }
+
+           /* persist the entities updated */
+           $em->persist($monster[0]);
+           $em->persist($character);
+           $em->flush();
+
+           /* test monster defeat */
+           if ($monsterLife <= 0) {
+            $tile[0].setMonster(null);
+            dump($tile);die;
+           } else {
+               /* monster attack */
+
+               /* set special effect */
+               $specialEffects = $monster[0]->getType() === $tileEffects[0]->getEffectTarget();
+            if ($specialEffects) {
+                $isStronger = $monster[0]->getAttack() + $tileEffects[0]->getEffectValue();
+                $monster[0]->setAttack($isStronger);
+            }
+
+            $monsterAttack      = $monster[0]->getAttack();
+            $characterShielding = $character->getShielding();
+            $characterLife      = $character->getLife();
+
+            /* set Character damages */
+              /* launch dice method missing */
+            if ($monsterAttack > $characterShielding) {
+                $remainingLife = $characterLife - ($monsterAttack - $characterShielding);
+                $character->setLife($remainingLife);
+            }
+            
+            /* persist the entities updated */
+            $em->persist($monster[0]);
+            $em->persist($character);
+            $em->flush();
+
+            /* test game over */
+            if ($characterLife <= 0) {
+                /* adventure.end */
+                dump('Game Over');die;
+            }
+
+           }
+        }
     }
 
     public function postRestAction($character): Response
