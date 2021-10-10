@@ -2,14 +2,14 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\{Character, Monster, Adventure, Tile, MonsterType, TileEffects};
 
 class CharacterController extends AbstractController
     {
 
-    /*Character.move*/    
-    public function postMoveAction(Character $character): Response
+    public function postMoveAction(Request $request, Character $character): Response
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -21,7 +21,7 @@ class CharacterController extends AbstractController
 
         $monsterRoaming = $monster[0]->getLife() !== 0;
         
-        /* if monster still alive, monster attacks - Monster.attack*/
+        /*** if monster still alive, monster attacks - Monster.attack ***/
         if ($monsterRoaming) {
 
             /* set special effect */
@@ -54,9 +54,9 @@ class CharacterController extends AbstractController
             }         
         }
         
-        /* character moves, a new tile is created and added to this adventure */
+        /*** character moves, a new tile is created and added to this adventure ***/
 
-        /* create a monster to assigned to the new tile - Tile.new */
+        /* create a monster to assigned to the new tile - Monster.new */
         $monster = new Monster();
         $monsterType = ['ork', 'gobelin', 'ghost', 'troll'];
         $monsterType = $monsterType[array_rand($monsterType, 1)];
@@ -68,95 +68,97 @@ class CharacterController extends AbstractController
         $em->persist($monster);
         $em->flush();
 
-        // create tile
+        /* create tile - Tile.new */
         $tile = new Tile();
         $tileType = ['grasslands', 'hills', 'forest', 'mountains', 'desert', 'swamp'];
         $tile->setType($tileType[array_rand($tileType, 1)]);
-        // set effects
+        /* set effects */
         $effects = $this->getDoctrine()->getRepository(TileEffects::class)->findEffectsByTypeTile($tile->getType());
         $tile->setEffects($effects);
-        // set monster
+        /* set monster */
         $tile->setMonster($monster);
         $em->persist($tile);
         $em->flush();
 
-        // add the new tile to the adventure of the character 
+        /* add the new tile to the adventure of the character */
         $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
         $adventure[0]->addTile($tile);
         dump($adventure);die;
 
     }
 
-    public function postAttackAction(Character $character): Response
+    public function postAttackAction(Request $request, Character $character): Response
     {
+        $em = $this->getDoctrine()->getManager();
+
         /* test if monster is roaming on the active tile */
         $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
         $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
         $monster = $this->getDoctrine()->getRepository(Monster::class)->findById($tile[0]->getMonster()->getId());
-        dump($monster);
-        
+        dump($tile);die;
         $monsterRoaming = $monster[0]->getLife() !== 0;
 
         if (!$monsterRoaming) {
-           dump('action refused');die;
+           dump('action stopped: no monster to attack');die;
         } else {
-           $character = $this->getDoctrine()->getRepository(Character::class)->findOneById($character);
+            $character = $this->getDoctrine()->getRepository(Character::class)->findOneById($character);
 
-           /* character attacks */
+            /*** character attacks ***/
             // $characterAttack    = $character->getAttack();
             $characterAttack    = 6;
             $monsterShielding   = $monster[0]->getShielding();
             $monsterLife        = $monster[0]->getLife();
 
-           /* launch dice method missing */
-           if ($characterAttack > $monsterShielding) {
-              $remainingLife = $monsterLife - ($characterAttack - $monsterShielding);
-              $monster[0]->setLife($remainingLife);
-              dump($monster);die;
-           }
-
-           /* persist the entities updated */
-           $em->persist($monster[0]);
-           $em->persist($character);
-           $em->flush();
-
-           /* test monster defeat */
-           if ($monsterLife <= 0) {
-            $tile[0].setMonster(null);
-            dump($tile);die;
-           } else {
-               /* monster attack */
-
-               /* set special effect */
-               $specialEffects = $monster[0]->getType() === $tileEffects[0]->getEffectTarget();
-            if ($specialEffects) {
-                $isStronger = $monster[0]->getAttack() + $tileEffects[0]->getEffectValue();
-                $monster[0]->setAttack($isStronger);
+            /* launch dice method missing */
+            if ($characterAttack > $monsterShielding) {
+                $remainingLife = $monsterLife - ($characterAttack - $monsterShielding);
+                $monster[0]->setLife($remainingLife);
             }
 
-            $monsterAttack      = $monster[0]->getAttack();
-            $characterShielding = $character->getShielding();
-            $characterLife      = $character->getLife();
-
-            /* set Character damages */
-              /* launch dice method missing */
-            if ($monsterAttack > $characterShielding) {
-                $remainingLife = $characterLife - ($monsterAttack - $characterShielding);
-                $character->setLife($remainingLife);
-            }
-            
             /* persist the entities updated */
             $em->persist($monster[0]);
             $em->persist($character);
             $em->flush();
 
-            /* test game over */
-            if ($characterLife <= 0) {
-                /* adventure.end */
-                dump('Game Over');die;
-            }
+            /* test monster defeat */
+            if ($monsterLife <= 0) {
+                $tile[0].setMonster(null);
+                dump($tile);die;
+            } else {
+                /*** monster attack ***/
 
-           }
+                /* set special effect */
+                $tileEffects = $this->getDoctrine()->getRepository(TileEffects::class)->findById($tile[0]->getEffects()->getId());
+                $specialEffects = $monster[0]->getType() === $tileEffects[0]->getEffectTarget();
+                
+                if ($specialEffects) {
+                    $isStronger = $monster[0]->getAttack() + $tileEffects[0]->getEffectValue();
+                    $monster[0]->setAttack($isStronger);
+                }
+
+                $monsterAttack      = $monster[0]->getAttack();
+                $characterShielding = $character->getShielding();
+                $characterLife      = $character->getLife();
+
+                /* set Character damages */
+                  /* launch dice method missing */
+                if ($monsterAttack > $characterShielding) {
+                    $remainingLife = $characterLife - ($monsterAttack - $characterShielding);
+                    $character->setLife($remainingLife);
+                }
+            
+                /* persist the entities updated */
+                $em->persist($monster[0]);
+                $em->persist($character);
+                $em->flush();
+
+                /* test game over */
+                if ($characterLife <= 0) {
+                    /* adventure.end */
+                    dump('Game Over');die;
+                }
+
+            }
         }
     }
 
@@ -169,6 +171,7 @@ class CharacterController extends AbstractController
 
     public function getCharacterAction(Character $character): Response
     {
+        /*** fetch the character parameters ***/
         $character = $this->getDoctrine()->getRepository(Character::class)->findById($character);
         dump($character);die;
     }

@@ -15,7 +15,7 @@ class AdventureController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        // create monster
+        /*** create monster - monster.new */
         $monster = new Monster();
         $monsterType = ['ork', 'gobelin', 'ghost', 'troll'];
         $monsterType = $monsterType[array_rand($monsterType, 1)];
@@ -27,19 +27,19 @@ class AdventureController extends AbstractController
         $em->persist($monster);
         $em->flush();
 
-        // create tile
+        /*** create tile - tile.new */
         $tile = new Tile();
         $tileType = ['grasslands', 'hills', 'forest', 'mountains', 'desert', 'swamp'];
         $tile->setType($tileType[array_rand($tileType, 1)]);
-        // set effects
+        /* set effects */
         $effects = $this->getDoctrine()->getRepository(TileEffects::class)->findEffectsByTypeTile($tile->getType());
         $tile->setEffects($effects);
-        // set monster
+        /* set monster */
         $tile->setMonster($monster);
         $em->persist($tile);
         $em->flush();
         
-        //create Character & set with default value
+        /*** create Character & set with default value - character.new ***/
         $character = new Character();
         $character->setLife(20);
         $character->setAttack(12);
@@ -47,7 +47,7 @@ class AdventureController extends AbstractController
         $em->persist($character);
         $em->flush();
 
-        //create Adventure
+        /*** create Adventure ***/
         $adventure = new Adventure();
         $adventure->setScore(0);
         $adventure->setTile($tile);
@@ -58,21 +58,20 @@ class AdventureController extends AbstractController
         dump($adventure);
         dump($character);die;
         
-        // try to setup JsonSerializableNormalizer
-        // $json = $serializer->serialize(
-        //     $adventure,
-        //     'json',
-        //     ['adventure' => 'show_adventure']
-        // );
+        /*** try to setup JsonSerializableNormalizer ***/
+        /* $json = $serializer->serialize($adventure,'json', ['adventure' => 'show_adventure']); */
 
     }
 
     public function getAdventureAction(Request $request, Adventure $adventure): Response
     {
+        /*** fetch Adventure parameters */
         $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findById($adventure);
-        // try to find solution to "null" parameters for joined Entity ($tile, $tile_effects, $monster, $character)
-        // $tile = $adventure[0]->getTile()
-        // $adventure = $this->getDoctrine()->getRepository(Adventure::class)->getAdventureItems($tile);
+        
+        /*** try to find solution to "null" parameters for joined Entity ($tile, $tile_effects, $monster, $character) ***/
+        /* $tile = $adventure[0]->getTile()
+           $adventure = $this->getDoctrine()->getRepository(Adventure::class)->getAdventureItems($tile);
+        */
 
         $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
         $character = $this->getDoctrine()->getRepository(Character::class)->findById($adventure[0]->getCharacter()->getId());
@@ -82,6 +81,7 @@ class AdventureController extends AbstractController
 
     public function getTileAction(Request $request, Adventure $adventure): Response
     {
+        /*** fetch Tile parameters ***/
         $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findById($adventure);
         $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
         $monster = $this->getDoctrine()->getRepository(Monster::class)->findById($tile[0]->getMonster()->getId());
