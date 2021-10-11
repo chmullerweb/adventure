@@ -13,16 +13,25 @@ class CharacterController extends AbstractController
     public function postMoveAction(Request $request, Character $character): Response
     {
         $em = $this->getDoctrine()->getManager();
-
+        
         $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
         $character = $this->getDoctrine()->getRepository(Character::class)->findOneById($character);
         $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
         $tileEffects = $this->getDoctrine()->getRepository(TileEffects::class)->findById($tile[0]->getEffects()->getId());
         $monster = $this->getDoctrine()->getRepository(Monster::class)->findById($tile[0]->getMonster()->getId());
 
-        $monsterRoaming = $monster[0]->getLife() !== 0;
-        
+        /* test if life of the character is impacted */
+        if ($tileEffects[0]->getType() === 'desert') {
+            $characterLife = $character->getLife();
+            $damage = $tileEffects[0]->getEffectValue());
+
+            $character->setLife($characterLife + $damage); 
+            $em->persist($character);
+            $em->flush();
+        }
+
         /*** if monster still alive, monster attacks - Monster.attack ***/
+        $monsterRoaming = $monster[0]->getLife() !== 0;
         if ($monsterRoaming) {
 
             /* set special effect */
@@ -55,36 +64,41 @@ class CharacterController extends AbstractController
             }         
         }
         
-        /*** character moves, a new tile is created and added to this adventure ***/
+        /* test if action of the character is impacted */
+        if ($tileEffects[0]->getType() === 'swamp') {
+            dump('move action cancelled');die;
+        } else { 
+            /*** character moves, a new tile is created and added to this adventure ***/
 
-        /* create a monster to assigned to the new tile - Monster.new */
-        $monster = new Monster();
-        $monsterType = ['ork', 'gobelin', 'ghost', 'troll'];
-        $monsterType = $monsterType[array_rand($monsterType, 1)];
-        $monsterType = $this->getDoctrine()->getRepository(MonsterType::class)->findMonsterByType($monsterType);
-        $monster->setType($monsterType->getType());
-        $monster->setLife($monsterType->getLife());
-        $monster->setAttack($monsterType->getAttack());
-        $monster->setShielding($monsterType->getShielding());
-        $em->persist($monster);
-        $em->flush();
+            /* create a monster to assigned to the new tile - Monster.new */
+            $monster = new Monster();
+            $monsterType = ['ork', 'gobelin', 'ghost', 'troll'];
+            $monsterType = $monsterType[array_rand($monsterType, 1)];
+            $monsterType = $this->getDoctrine()->getRepository(MonsterType::class)->findMonsterByType($monsterType);
+            $monster->setType($monsterType->getType());
+            $monster->setLife($monsterType->getLife());
+            $monster->setAttack($monsterType->getAttack());
+            $monster->setShielding($monsterType->getShielding());
+            $em->persist($monster);
+            $em->flush();
 
-        /* create tile - Tile.new */
-        $tile = new Tile();
-        $tileType = ['grasslands', 'hills', 'forest', 'mountains', 'desert', 'swamp'];
-        $tile->setType($tileType[array_rand($tileType, 1)]);
-        /* set effects */
-        $effects = $this->getDoctrine()->getRepository(TileEffects::class)->findEffectsByTypeTile($tile->getType());
-        $tile->setEffects($effects);
-        /* set monster */
-        $tile->setMonster($monster);
-        $em->persist($tile);
-        $em->flush();
+            /* create tile - Tile.new */
+            $tile = new Tile();
+            $tileType = ['grasslands', 'hills', 'forest', 'mountains', 'desert', 'swamp'];
+            $tile->setType($tileType[array_rand($tileType, 1)]);
+            /* set effects */
+            $effects = $this->getDoctrine()->getRepository(TileEffects::class)->findEffectsByTypeTile($tile->getType());
+            $tile->setEffects($effects);
+            /* set monster */
+            $tile->setMonster($monster);
+            $em->persist($tile);
+            $em->flush();
 
-        /* add the new tile to the adventure of the character */
-        $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
-        $adventure[0]->addTile($tile);
-        dump($adventure);die;
+            /* add the new tile to the adventure of the character */
+            $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
+            $adventure[0]->addTile($tile);
+            dump($adventure);die;
+        }
 
     }
 
@@ -92,9 +106,11 @@ class CharacterController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        /* test if monster is roaming on the active tile */
+        $character = $this->getDoctrine()->getRepository(Character::class)->findOneById($character);
         $adventure = $this->getDoctrine()->getRepository(Adventure::class)->findAdventureByCharacter($character);
         $tile = $this->getDoctrine()->getRepository(Tile::class)->findById($adventure[0]->getTile()->getId());
+
+        /* test if monster is roaming on the active tile */
         $monster = $this->getDoctrine()->getRepository(Monster::class)->findById($tile[0]->getMonster()->getId());
 
         $monsterRoaming = $monster[0]->getLife() !== 0;
@@ -102,11 +118,21 @@ class CharacterController extends AbstractController
         if (!$monsterRoaming) {
            dump('action stopped: no monster to attack');die;
         } else {
-            $character = $this->getDoctrine()->getRepository(Character::class)->findOneById($character);
-
             /*** character attacks ***/
-            // $characterAttack    = $character->getAttack();
-            $characterAttack    = 6;
+
+            /* test if life of the character is impacted */
+            $tileEffects = $this->getDoctrine()->getRepository(TileEffects::class)->findById($tile[0]->getEffects()->getId());
+
+            if ($tileEffects[0]->getType() === 'desert') {
+                $characterLife = $character->getLife();
+                $damage = $tileEffects[0]->getEffectValue());
+
+                $character->setLife($characterLife + $damage); 
+                $em->persist($character);
+                $em->flush();
+            }
+
+            $characterAttack    = $character->getAttack();
             $monsterShielding   = $monster[0]->getShielding();
             $monsterLife        = $monster[0]->getLife();
 
